@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malakoff Humanis- Strategic Growth and Social Impact Report - NotebookLM - Quiz Export</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+        :root {
+            --bg: #f6f1e7;
+            --bg-deep: #efe4d6;
+            --ink: #171717;
+            --muted: #5b5b5b;
+            --accent: #d3542c;
+            --accent-light: #ff8f5a;
+            --accent-dark: #b14320;
+            --teal: #1f6f78;
+            --card: #fff7ef;
+            --stroke: #e3d6c5;
+            --shadow: 0 18px 40px rgba(23, 23, 23, 0.12);
+            --radius-sm: 10px;
+            --radius-md: 12px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+            --radius-2xl: 22px;
+            --space-1: 6px;
+            --space-2: 8px;
+            --space-3: 10px;
+            --space-4: 12px;
+            --space-5: 14px;
+            --space-6: 16px;
+            --space-7: 18px;
+            --space-8: 20px;
+            --space-9: 24px;
+            --space-10: 32px;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'IBM Plex Sans', sans-serif;
+            --error: #b54832;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background:
+                radial-gradient(240px 140px at 10% -10%, #ffd2b9 0%, transparent 70%),
+                radial-gradient(220px 160px at 90% 0%, #cfe7e6 0%, transparent 65%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+            color: var(--ink);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 800px;
+            padding: var(--space-10) var(--space-8);
+            box-sizing: border-box;
+            background: var(--card);
+            border-radius: var(--radius-2xl);
+            border: 1px solid var(--stroke);
+            box-shadow: var(--shadow);
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .progress-text {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 16px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-correct { color: var(--teal); }
+        .status-wrong { color: var(--error); }
+
+        .question-text {
+            font-family: var(--font-display);
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            background-color: #fff;
+            border: 1px solid var(--stroke);
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-item:hover:not(.selected) {
+            background-color: var(--card);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(23, 23, 23, 0.12);
+        }
+
+        .option-item.selected.correct {
+            background-color: rgba(31, 111, 120, 0.12);
+            border-color: var(--teal);
+        }
+
+        .option-item.selected.incorrect {
+            background-color: rgba(181, 72, 50, 0.12);
+            border-color: var(--error);
+        }
+
+        .option-item.revealed-correct {
+            border-color: rgba(31, 111, 120, 0.5);
+            box-shadow: inset 0 0 0 1px rgba(31, 111, 120, 0.16);
+        }
+
+        .option-label {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feedback-state {
+            font-weight: bold;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .selected .feedback-state {
+            display: block;
+        }
+
+        .revealed-correct .feedback-state {
+            display: block;
+        }
+
+        .correct .feedback-state { color: var(--teal); }
+        .incorrect .feedback-state { color: var(--error); }
+        .revealed-correct .feedback-state { color: var(--teal); }
+
+        .rationale {
+            font-size: 0.95em;
+            color: var(--muted);
+            margin-top: 4px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .selected .rationale {
+            display: block;
+        }
+
+        .revealed-correct .rationale {
+            display: block;
+        }
+        .hint-toggle {
+            border: 1px solid var(--stroke);
+            color: var(--muted);
+            cursor: pointer;
+            padding: var(--space-2) var(--space-6);
+            border-radius: var(--radius-md);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hint-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(23, 23, 23, 0.12);
+        }
+
+        .hint-content {
+            margin-top: 32px;
+            padding: var(--space-6);
+            background-color: #fff;
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius-lg);
+            font-size: 0.95em;
+            color: var(--muted);
+            display: none;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .hint-content.active {
+            display: flex;
+        }
+
+        .hint-icon-box {
+            color: var(--accent-dark);
+            font-size: 1.2em;
+            margin-top: -2px;
+        }
+
+        .navigation {
+            margin-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            border-radius: var(--radius-md);
+            padding: var(--space-2) var(--space-7);
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-prev {
+            background-color: #fff;
+            color: var(--ink);
+            border-color: var(--stroke);
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(23, 23, 23, 0.12);
+        }
+
+        .btn-next {
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            color: #fff;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(23, 23, 23, 0.12);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .results-screen {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-8);
+        }
+
+        .results-title {
+            font-family: var(--font-display);
+            font-size: 2.1em;
+            margin: 0;
+        }
+
+        .results-subtitle {
+            color: var(--muted);
+            margin: 0;
+            font-size: 1em;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .result-card {
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            background: #fff;
+            border: 1px solid var(--stroke);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .result-label {
+            color: var(--muted);
+            font-size: 0.95em;
+        }
+
+        .result-value {
+            font-size: 2em;
+            font-family: var(--font-display);
+        }
+
+        .result-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            color: var(--muted);
+            font-size: 0.95em;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            border: 1px solid var(--stroke);
+            color: var(--ink);
+        }
+
+        .hidden { display: none; }
+
+        @media (max-width: 900px) {
+            .quiz-container {
+                margin: var(--space-8);
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .quiz-container {
+                padding: var(--space-8) var(--space-6);
+            }
+
+            .question-text {
+                font-size: 1.3em;
+            }
+
+            .option-item {
+                padding: var(--space-4);
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                align-items: flex-start;
+            }
+
+            .quiz-container {
+                margin: var(--space-6);
+                padding: var(--space-7) var(--space-5);
+            }
+
+            .progress-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-3);
+            }
+
+            .navigation {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--space-4);
+            }
+
+            .nav-buttons {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .hint-toggle {
+                justify-content: space-between;
+            }
+
+            .results-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="quiz-content">
+            <!-- Dynamic Content -->
+        </div>
+        <div id="results-content" class="hidden"></div>
+
+        <div id="hint-box" class="hint-content">
+            <div class="hint-icon-box">💡</div>
+            <div id="hint-text"></div>
+        </div>
+
+        <div class="navigation">
+            <button id="hint-toggle" class="hint-toggle">
+                <span>Hint</span>
+                <span id="hint-icon-arrow">▼</span>
+            </button>
+            <div class="nav-buttons">
+                <button id="prev-btn" class="btn btn-prev">Previous</button>
+                <button id="next-btn" class="btn btn-next">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [{"answerOptions":[{"isCorrect":false,"rationale":"Bien que la retraite soit majeure, la stratégie SMILE 26 prévoit une diversification, notamment vers l'épargne.","text":"Se spécialiser exclusivement dans la gestion de la retraite complémentaire."},{"isCorrect":false,"rationale":"Le Groupe reste focalisé sur la protection sociale paritaire et mutualiste sans chercher à devenir une banque universelle.","text":"Fusionner avec des acteurs bancaires pour devenir un groupe financier universel."},{"isCorrect":true,"rationale":"Cette ambition traduit la volonté du Groupe de placer l'accompagnement et la clarté au cœur de sa nouvelle phase de développement.","text":"Devenir un compagnon agissant pour une protection sociale simple et responsable."},{"isCorrect":false,"rationale":"Le statut paritaire et mutualiste à but non lucratif est un pilier fondamental réaffirmé dans la stratégie du Groupe.","text":"Abandonner le modèle à but non lucratif pour maximiser les dividendes."}],"hint":"Cherchez le terme désignant un partenaire du quotidien facilitant la vie des assurés.","question":"Quel est l'objectif central du plan stratégique SMILE 26 lancé par Malakoff Humanis pour la période 2023-2026 ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Le pôle épargne se concentre sur la préparation de l'avenir et la valorisation du capital, pas sur le crédit.","text":"Le crédit à la consommation pour les seniors."},{"isCorrect":false,"rationale":"Malakoff Humanis s'appuie sur des réseaux de soins partenaires plutôt que sur la gestion directe d'hôpitaux.","text":"La gestion directe d'établissements hospitaliers."},{"isCorrect":false,"rationale":"Le Groupe se concentre sur l'assurance de personnes et non sur l'assurance IARD (incendie, accidents, risques divers).","text":"L'assurance dommages pour les véhicules."},{"isCorrect":true,"rationale":"Cette diversification réussie permet de proposer une offre complète incluant l'assurance vie et les plans d'épargne retraite.","text":"L'Épargne (assurance vie, retraite individuelle et collective)."}],"hint":"Il s'agit d'un domaine financier permettant de se constituer un capital ou de préparer sa retraite.","question":"En 2024, quelle activité a été érigée en nouveau pilier stratégique suite au rapprochement avec La France Mutualiste ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Le taux de redistribution est élevé mais doit permettre de couvrir les frais de gestion et de garantir la solvabilité.","text":"L'obligation légale de rembourser l'intégralité des cotisations perçues chaque année."},{"isCorrect":true,"rationale":"Cette approche garantit que les excédents servent à améliorer les garanties, financer l'action sociale ou soutenir des causes sociétales.","text":"Le reversement de la valeur créée aux clients, aux salariés et à l'intérêt général."},{"isCorrect":false,"rationale":"Le terme 'redistributif' chez Malakoff Humanis concerne le partage de la valeur financière et sociale, pas l'immobilier.","text":"La redistribution géographique des agences physiques sur tout le territoire européen."},{"isCorrect":false,"rationale":"Le Groupe étant à but non lucratif, il n'a pas d'actionnaires à rémunérer.","text":"La distribution systématique de bénéfices sous forme de dividendes aux actionnaires."}],"hint":"Pensez à l'utilisation des excédents financiers dans une structure sans actionnaire.","question":"Que signifie le modèle 'redistributif' revendiqué par la stratégie de Malakoff Humanis ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Un taux de $100\\ \\%$ ne permettrait pas de couvrir les frais de fonctionnement nécessaires à la gestion des dossiers.","text":"Précisément $100\\ \\%$"},{"isCorrect":false,"rationale":"Un taux de $50\\ \\%$ serait très faible pour une mutuelle et ne correspondrait pas à sa mission sociale.","text":"Environ $50\\ \\%$"},{"isCorrect":false,"rationale":"Ce chiffre est irréaliste pour un groupe de protection sociale majeur visant l'utilité sociale.","text":"Moins de $25\\ \\%$"},{"isCorrect":true,"rationale":"Ce taux élevé signifie que sur $100\\ €$ de cotisations, plus de $84\\ €$ sont reversés sous forme de prestations aux assurés.","text":"Plus de $84\\ \\%$"}],"hint":"C'est l'un des taux les plus élevés du marché, dépassant les $80\\ \\%$.","question":"Quel était le taux moyen de redistribution en santé de Malakoff Humanis en 2024 ?"},{"answerOptions":[{"isCorrect":true,"rationale":"La Fondation Malakoff Humanis Handicap soutient depuis plus de 10 ans des projets d'accès à l'emploi, aux soins et à la culture.","text":"Le Handicap"},{"isCorrect":false,"rationale":"Cette cause n'est pas citée comme l'un des quatre piliers majeurs de l'engagement sociétal du Groupe.","text":"La lutte contre l'illettrisme"},{"isCorrect":false,"rationale":"Le Groupe se concentre sur les fragilités sociales liées à la santé et au vieillissement plutôt que sur le secteur bancaire solidaire.","text":"Le développement du micro-crédit"},{"isCorrect":false,"rationale":"Bien que le Groupe ait des engagements écologiques, sa fondation historique n'est pas dédiée à l'environnement marin.","text":"La protection des océans"}],"hint":"Cette cause concerne l'inclusion des personnes dont les capacités physiques ou mentales sont limitées.","question":"Parmi ces causes, laquelle fait l'objet d'un engagement historique via une Fondation dédiée au sein du Groupe ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Le Groupe ne cherche pas à créer un outil de diagnostic médical autonome mais à encadrer l'usage de l'IA.","text":"L'algorithme de diagnostic universel"},{"isCorrect":false,"rationale":"La stratégie se concentre sur l'IA logicielle et les données plutôt que sur la robotique physique.","text":"La charte Robotique pour tous"},{"isCorrect":false,"rationale":"Malakoff Humanis privilégie le cadre de Positive AI lancé avec d'autres grands groupes français comme Orange ou L'Oréal.","text":"Le projet OpenHealth AI"},{"isCorrect":true,"rationale":"Ce programme vise à instaurer des principes d'éthique, de transparence et de responsabilité dans l'usage de l'intelligence artificielle.","text":"L'initiative Positive AI"}],"hint":"Le nom de cette initiative contient un adjectif évoquant une contribution constructive.","question":"Dans sa stratégie d'innovation, quelle initiative Malakoff Humanis soutient-il pour promouvoir une IA responsable ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Il s'agit de la part de marché du Groupe en assurance collective, pas de son poids dans l'Agirc-Arrco.","text":"$15\\ \\%$"},{"isCorrect":false,"rationale":"Ce chiffre sous-estime la position de leader du Groupe dans la gestion de la retraite complémentaire.","text":"$25\\ \\%$"},{"isCorrect":true,"rationale":"Le Groupe est un acteur central gérant les cotisations et allocations pour environ 40 % du régime Agirc-Arrco.","text":"$40\\ \\%$"},{"isCorrect":false,"rationale":"Bien que leader, le Groupe partage la gestion du régime avec d'autres groupes de protection sociale.","text":"$65\\ \\%$"}],"hint":"C'est une part très importante, proche de la moitié du régime national.","question":"Quel pourcentage de la retraite complémentaire Agirc-Arrco est géré par Malakoff Humanis en France ?"},{"answerOptions":[{"isCorrect":true,"rationale":"Cette trajectoire de décarbonation s'accompagne d'actions concrètes comme la sortie complète du charbon thermique.","text":"Une réduction de $20\\ \\%$ de l'intensité carbone par rapport à 2022."},{"isCorrect":false,"rationale":"Les investissements sont nécessaires pour garantir les prestations futures des assurés et retraités.","text":"Un arrêt total des investissements financiers pour réduire l'empreinte."},{"isCorrect":false,"rationale":"Le Groupe diversifie ses placements tout en visant une baisse globale de l'intensité carbone de l'ensemble de ses actifs.","text":"L'achat exclusif d'obligations vertes."},{"isCorrect":false,"rationale":"Le Groupe investit au contraire dans la technologie pour sa transformation et via son fonds MH Innov'.","text":"Zéro investissement dans les entreprises technologiques."}],"hint":"L'objectif vise une diminution significative des émissions de gaz à effet de serre liées aux placements.","question":"Quelle est l'ambition climatique de Malakoff Humanis concernant son portefeuille d'investissement d'ici 2026 ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Le nom officiel choisi par le Groupe pour son fonds d'investissement est MH Innov'.","text":"Malakoff Ventures"},{"isCorrect":false,"rationale":"MH Innov' est le nom de la structure dédiée aux participations dans les startups technologiques.","text":"Humanis Capital"},{"isCorrect":false,"rationale":"Bien que tourné vers la santé, le fonds a une dénomination spécifique soulignant la recherche d'innovation globale.","text":"HealthTech Fund"},{"isCorrect":true,"rationale":"Ce fonds permet au Groupe de soutenir l'innovation dans les secteurs InsurTech et RH pour enrichir ses services.","text":"MH Innov'"}],"hint":"Le nom combine les initiales du groupe et un diminutif du mot 'innovation'.","question":"Comment s'appelle le fonds d'investissement de 250 millions d'euros dédié aux startups de la e-santé et de l'impact ?"},{"answerOptions":[{"isCorrect":false,"rationale":"Ce montant serait inférieur aux engagements de protection du pouvoir d'achat pris par le Groupe pour ses salariés.","text":"$21\\ 000\\ €$"},{"isCorrect":false,"rationale":"Bien que le salaire minimum soit élevé, il n'avait pas atteint ce seuil spécifique en 2025.","text":"$30\\ 000\\ €$"},{"isCorrect":true,"rationale":"Ce montant représente une garantie de rémunération supérieure de près de $25\\ \\%$ au SMIC au début de l'année 2025.","text":"$27\\ 000\\ €$"},{"isCorrect":false,"rationale":"C'était l'objectif fixé en 2022, mais il a été revalorisé depuis lors.","text":"$25\\ 000\\ €$"}],"hint":"Le chiffre se situe entre 25 000 et 30 000 euros.","question":"Dans le cadre de son contrat social, à quel montant Malakoff Humanis a-t-il porté son salaire minimum annuel brut en 2025 ?"}];
+        let currentIndex = 0;
+        let mode = 'quiz';
+        let state = quizData.map(() => ({ selectedIndex: null, hintVisible: false }));
+
+        function getStats() {
+            const answered = state.filter((s) => s.selectedIndex !== null).length;
+            const correct = state.filter((s, i) => s.selectedIndex !== null && quizData[i].answerOptions[s.selectedIndex].isCorrect).length;
+            const wrong = state.filter((s, i) => s.selectedIndex !== null && !quizData[i].answerOptions[s.selectedIndex].isCorrect).length;
+            const skipped = quizData.length - answered;
+            const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+            return { answered, correct, wrong, skipped, accuracy };
+        }
+
+        function shuffleAnswers() {
+            quizData.forEach((q) => {
+                for (let i = q.answerOptions.length - 1; i > 0; i -= 1) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [q.answerOptions[i], q.answerOptions[j]] = [q.answerOptions[j], q.answerOptions[i]];
+                }
+            });
+        }
+
+        function shuffleQuestions() {
+            for (let i = quizData.length - 1; i > 0; i -= 1) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [quizData[i], quizData[j]] = [quizData[j], quizData[i]];
+            }
+        }
+
+        function resetState() {
+            state = quizData.map(() => ({ selectedIndex: null, hintVisible: false }));
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIndex];
+            const s = state[currentIndex];
+            const content = document.getElementById('quiz-content');
+            const results = document.getElementById('results-content');
+            const hintBox = document.getElementById('hint-box');
+            const nav = document.querySelector('.navigation');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+
+            let optionsHtml = '';
+            const correctIndex = q.answerOptions.findIndex((o) => o.isCorrect);
+            const selectedCorrect = s.selectedIndex !== null && q.answerOptions[s.selectedIndex].isCorrect;
+            q.answerOptions.forEach((opt, idx) => {
+                const isSelected = s.selectedIndex === idx;
+                const statusClass = isSelected ? (opt.isCorrect ? 'correct' : 'incorrect') : '';
+                const selectedClass = isSelected ? 'selected' : '';
+                const revealCorrect = (s.selectedIndex !== null && !selectedCorrect && opt.isCorrect) || (mode === 'review' && opt.isCorrect);
+                const revealClass = revealCorrect ? 'revealed-correct' : '';
+
+                optionsHtml += `
+                    <li class="option-item ${selectedClass} ${statusClass} ${revealClass}" onclick="selectOption(${idx})">
+                        <div class="option-label">
+                            <span>${String.fromCharCode(65 + idx)}. ${opt.text}</span>
+                        </div>
+                        <div class="feedback-state">
+                            ${opt.isCorrect ? '✓ Right answer' : '✕ Not quite'}
+                        </div>
+                        ${opt.rationale ? '<div class="rationale">' + opt.rationale + '</div>' : ''}
+                    </li>
+                `;
+            });
+
+            const stats = getStats();
+
+            content.innerHTML = `
+                <div class="progress-container">
+                    <div class="progress-text">${currentIndex + 1} / ${quizData.length}</div>
+                    <div class="status-bar">
+                        <div class="status-item status-correct">
+                            <span>✓</span>
+                            <span>${stats.correct}</span>
+                        </div>
+                        <div class="status-item status-wrong">
+                            <span>✕</span>
+                            <span>${stats.wrong}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="question-text">${q.question}</div>
+                <ul class="options-list">
+                    ${optionsHtml}
+                </ul>
+            `;
+
+            // Update Hint Box
+            const hintText = document.getElementById('hint-text');
+            hintText.innerText = q.hint || 'No hint available for this question.';
+            if (s.hintVisible) {
+                hintBox.classList.add('active');
+            } else {
+                hintBox.classList.remove('active');
+            }
+
+            results.classList.add('hidden');
+            content.classList.remove('hidden');
+            hintBox.classList.remove('hidden');
+            nav.classList.remove('hidden');
+
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = false;
+            if (mode === 'review') {
+                nextBtn.innerText = currentIndex === quizData.length - 1 ? 'Back to Results' : 'Next';
+            } else {
+                nextBtn.innerText = currentIndex === quizData.length - 1 ? 'Finish' : 'Next';
+            }
+            document.getElementById('hint-icon-arrow').innerText = s.hintVisible ? '▲' : '▼';
+        }
+
+        function selectOption(idx) {
+            if (mode !== 'quiz') return;
+            if (state[currentIndex].selectedIndex !== null) return; // Prevent re-selection
+            state[currentIndex].selectedIndex = idx;
+            renderQuestion();
+        }
+
+        function toggleHint() {
+            if (mode === 'results') return;
+            state[currentIndex].hintVisible = !state[currentIndex].hintVisible;
+            renderQuestion();
+        }
+
+        function renderResults() {
+            const stats = getStats();
+            const content = document.getElementById('quiz-content');
+            const results = document.getElementById('results-content');
+            const hintBox = document.getElementById('hint-box');
+            const nav = document.querySelector('.navigation');
+
+            const score = `${stats.correct} / ${quizData.length}`;
+
+            results.innerHTML = `
+                <div class="results-screen">
+                    <div>
+                        <h1 class="results-title">You did it! Quiz Complete.</h1>
+                        <p class="results-subtitle">Review your score or take another run.</p>
+                    </div>
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <div class="result-label">Score</div>
+                            <div class="result-value">${score}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Accuracy</div>
+                            <div class="result-value">${stats.accuracy}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-metrics">
+                                <div>Right <strong>${stats.correct}</strong></div>
+                                <div>Wrong <strong>${stats.wrong}</strong></div>
+                                <div>Skipped <strong>${stats.skipped}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="results-actions">
+                        <button id="review-btn" class="btn btn-ghost">Review Quiz</button>
+                        <button id="retake-btn" class="btn btn-next">Retake Quiz</button>
+                    </div>
+                </div>
+            `;
+
+            content.classList.add('hidden');
+            results.classList.remove('hidden');
+            hintBox.classList.add('hidden');
+            nav.classList.add('hidden');
+
+            document.getElementById('review-btn').onclick = () => {
+                mode = 'review';
+                currentIndex = 0;
+                renderQuestion();
+            };
+
+            document.getElementById('retake-btn').onclick = () => {
+                mode = 'quiz';
+                currentIndex = 0;
+                shuffleQuestions();
+                shuffleAnswers();
+                resetState();
+                renderQuestion();
+            };
+        }
+
+        document.getElementById('prev-btn').onclick = () => {
+            if (mode === 'results') return;
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        };
+
+        document.getElementById('next-btn').onclick = () => {
+            if (mode === 'results') return;
+            if (mode === 'review') {
+                if (currentIndex < quizData.length - 1) {
+                    currentIndex++;
+                    renderQuestion();
+                } else {
+                    mode = 'results';
+                    renderResults();
+                }
+                return;
+            }
+            if (currentIndex < quizData.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                mode = 'results';
+                renderResults();
+            }
+        };
+
+        document.getElementById('hint-toggle').onclick = toggleHint;
+
+        renderQuestion();
+    </script>
+</body>
+</html>
